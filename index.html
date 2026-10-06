@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>한국을 빛낸 위인 30인 카드</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts: Gaegu (cute heading font) & Gowun Batang / Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- QRCode.js Library for dynamic QR generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ghibli: {
+              bg: '#fbf7ee',
+              cardFront: '#fffcf5',
+              cardBack: '#ffffff',
+              border: '#e6d8c3',
+              primary: '#4a3b32',
+              secondary: '#8c6d58',
+              accent: '#d96b43',
+              green: '#6b8e4e',
+              gold: '#e0a96d',
+              softYellow: '#fef5e7',
+              modalBg: 'rgba(50, 40, 35, 0.6)'
+            }
+          },
+          fontFamily: {
+            gaegu: ['Gaegu', 'cursive'],
+            gowun: ['Gowun Dodum', 'sans-serif'],
+            sans: ['Noto Sans KR', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #fbf7ee;
+      font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+      color: #4a3b32;
+    }
+
+    /* 3D Flip Card Container */
+    .card-perspective {
+      perspective: 1000px;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-style: preserve-3d;
+      border-radius: 1rem;
+    }
+
+    .card-container.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 1rem;
+      border: 2px solid #e6d8c3;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    /* Custom Scrollbar for Card Back Story */
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #fbf7ee;
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #d0c0a8;
+      border-radius: 4px;
+    }
+
+    /* Print Stylesheet for Classroom Printables */
+    @media print {
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 12px !important;
+        width: 100% !important;
+      }
+      .card-perspective {
+        aspect-ratio: 2 / 2.8 !important;
+        page-break-inside: avoid;
+      }
+      .card-inner {
+        transform: none !important;
+      }
+      .card-front {
+        position: relative !important;
+        box-shadow: none !important;
+        border: 1px solid #aaa !important;
+      }
+      .card-back {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-3 md:p-6 antialiased">
+
+  <!-- Top Navigation & Header -->
+  <header class="w-full max-w-7xl mb-6 text-center no-print">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 bg-ghibli-cardFront p-4 md:p-6 rounded-2xl border-2 border-ghibli-border shadow-sm">
+      
+      <!-- Title Section -->
+      <div class="text-center md:text-left">
+        <div class="inline-flex items-center gap-2 px-3 py-1 bg-ghibli-softYellow rounded-full border border-ghibli-gold text-xs font-bold text-ghibli-accent mb-1">
+          <i class="fa-solid fa-graduation-cap"></i> 초등 2학년 맞춤형 역사 탐구
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold font-gaegu text-ghibli-primary flex items-center justify-center md:justify-start gap-2">
+          <span>🇰🇷 한국을 빛낸 위인 30인 카드</span>
+        </h1>
+        <p class="text-xs md:text-sm text-ghibli-secondary mt-1">
+          카드를 클릭하거나 터치하면 부드럽게 뒤집히며 이야기와 질문이 나타나요!
+        </p>
+      </div>
+
+      <!-- Control Buttons & Actions -->
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <!-- QR Code Share Button -->
+        <button id="btnQrModal" class="px-4 py-2.5 bg-ghibli-green text-white font-medium rounded-xl shadow-sm hover:bg-opacity-90 active:scale-95 transition flex items-center gap-2 text-sm">
+          <i class="fa-solid fa-qrcode text-base"></i>
+          <span>QR코드 접속</span>
+        </button>
+
+        <!-- Print Cards Button -->
+        <button onclick="window.print()" class="px-4 py-2.5 bg-ghibli-accent text-white font-medium rounded-xl shadow-sm hover:bg-opacity-90 active:scale-95 transition flex items-center gap-2 text-sm">
+          <i class="fa-solid fa-print text-base"></i>
+          <span>카드 인쇄</span>
+        </button>
+
+        <!-- Flip All / Reset Toggle -->
+        <button id="btnFlipToggle" onclick="toggleFlipAll()" class="px-4 py-2.5 bg-ghibli-gold text-ghibli-primary font-bold rounded-xl shadow-sm hover:bg-opacity-90 active:scale-95 transition flex items-center gap-2 text-sm border border-ghibli-border">
+          <i class="fa-solid fa-rotate"></i>
+          <span id="flipToggleText">전체 뒤집기</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 bg-ghibli-cardFront/80 p-3 rounded-xl border border-ghibli-border">
+      <!-- Search Input -->
+      <div class="relative w-full sm:w-72">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-ghibli-secondary text-sm"></i>
+        <input type="text" id="searchInput" oninput="filterCards()" placeholder="위인 이름 또는 키워드 검색..." 
+               class="w-full pl-9 pr-4 py-2 text-sm bg-white rounded-lg border border-ghibli-border focus:outline-none focus:ring-2 focus:ring-ghibli-accent text-ghibli-primary">
+      </div>
+
+      <!-- Era Filter Buttons -->
+      <div class="flex flex-wrap items-center justify-center gap-1.5 text-xs font-medium w-full sm:w-auto" id="eraFilterContainer">
+        <button onclick="setEraFilter('all')" class="era-btn active px-3 py-1.5 rounded-lg border border-ghibli-border bg-ghibli-primary text-white transition">전체 (30)</button>
+        <button onclick="setEraFilter('고조선')" class="era-btn px-3 py-1.5 rounded-lg border border-ghibli-border bg-white text-ghibli-primary hover:bg-ghibli-softYellow transition">고조선</button>
+        <button onclick="setEraFilter('삼국')" class="era-btn px-3 py-1.5 rounded-lg border border-ghibli-border bg-white text-ghibli-primary hover:bg-ghibli-softYellow transition">삼국/발해</button>
+        <button onclick="setEraFilter('고려')" class="era-btn px-3 py-1.5 rounded-lg border border-ghibli-border bg-white text-ghibli-primary hover:bg-ghibli-softYellow transition">고려</button>
+        <button onclick="setEraFilter('조선')" class="era-btn px-3 py-1.5 rounded-lg border border-ghibli-border bg-white text-ghibli-primary hover:bg-ghibli-softYellow transition">조선</button>
+        <button onclick="setEraFilter('근현대')" class="era-btn px-3 py-1.5 rounded-lg border border-ghibli-border bg-white text-ghibli-primary hover:bg-ghibli-softYellow transition">근현대</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid Container (Default 5x6 Layout on Desktop: grid-cols-6) -->
+  <main class="w-full max-w-7xl flex-1">
+    <div id="cardGrid" class="print-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 w-full">
+      <!-- Dynamically generated via JS -->
+    </div>
+
+    <!-- Empty Filter Search Result Notice -->
+    <div id="noResults" class="hidden text-center py-16">
+      <i class="fa-solid fa-ghost text-4xl text-ghibli-secondary mb-2"></i>
+      <p class="text-base font-bold text-ghibli-primary">검색된 위인이 없습니다.</p>
+      <p class="text-xs text-ghibli-secondary">다른 검색어나 시대 필터를 선택해 보세요.</p>
+    </div>
+  </main>
+
+  <!-- QR Code Modal (Interactive & Dynamic) -->
+  <div id="qrModal" class="fixed inset-0 bg-ghibli-modalBg backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-ghibli-cardFront border-2 border-ghibli-border w-full max-w-md rounded-2xl p-6 shadow-xl relative animate-fade-in text-center">
+      
+      <!-- Close Button -->
+      <button id="btnCloseQr" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-ghibli-softYellow text-ghibli-primary hover:bg-ghibli-gold transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="w-12 h-12 bg-ghibli-green/10 text-ghibli-green rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+        <i class="fa-solid fa-qrcode"></i>
+      </div>
+
+      <h3 class="text-2xl font-bold font-gaegu text-ghibli-primary">웹사이트 접속 QR 코드</h3>
+      <p class="text-xs text-ghibli-secondary mt-1 mb-4">
+        스마트폰이나 태블릿 카메라로 QR 코드를 스캔하면<br>어디서든 이 위인 카드 사이트에 바로 접속할 수 있습니다.
+      </p>
+
+      <!-- QR Code Display Box -->
+      <div class="bg-white p-4 rounded-xl border-2 border-dashed border-ghibli-border inline-block my-2 shadow-inner">
+        <div id="qrcodeCanvas" class="flex justify-center items-center"></div>
+      </div>
+
+      <!-- Dynamic URL Input & Copy -->
+      <div class="mt-4 text-left">
+        <label class="block text-xs font-bold text-ghibli-primary mb-1">접속 URL 주소 (수정 가능):</label>
+        <div class="flex items-center gap-2">
+          <input type="text" id="qrUrlInput" class="flex-1 px-3 py-2 text-xs bg-white rounded-lg border border-ghibli-border text-ghibli-primary focus:outline-none focus:ring-1 focus:ring-ghibli-accent" readonly>
+          <button onclick="copyQrUrl()" class="px-3 py-2 bg-ghibli-primary text-white text-xs font-medium rounded-lg hover:bg-opacity-90 active:scale-95 transition flex items-center gap-1">
+            <i class="fa-solid fa-copy"></i> 복사
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-6 flex justify-center gap-2">
+        <button onclick="downloadQrCode()" class="w-full py-2.5 bg-ghibli-gold text-ghibli-primary font-bold text-xs rounded-xl hover:bg-opacity-90 transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-download"></i> QR 이미지 저장
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-12 text-center text-xs text-ghibli-secondary no-print py-4 border-t border-ghibli-border/60 w-full max-w-7xl">
+    <p>🇰🇷 초등 사회/역사 탐구 학습용 위인FlipCard 프로젝트 | 30인 한국 위인 이야기</p>
+  </footer>
+
+  <script>
+    // 30 Korean Historical Figures Data
+    const heroesData = [
+      { id: 1, name: "단군왕검", era: "고조선", category: "고조선", icon: "👑", story: "우리나라의 첫 번째 나라인 '고조선'을 만든 훌륭한 임금님이에요. 백성들이 서로 돕고 널리 이롭게 살 수 있도록 좋은 가르침을 주셨어요. 단군왕검 덕분에 우리나라의 멋진 역사가 시작되었답니다.", question: "친구들과 서로 도우며 지내려면 어떤 마음이 필요할까요?" },
+      { id: 2, name: "주몽", era: "고구려", category: "삼국", icon: "🏹", story: "활을 아주 잘 쏘아 고구려를 세운 용감한 임금님이에요. 어릴 때부터 어려운 일을 지혜롭게 헤쳐 나가며 큰 나라를 만들었어요. 언제나 자신감을 가지고 새로운 도전을 두려워하지 않았답니다.", question: "내가 가장 잘하고 자신 있는 행동은 무엇인가요?" },
+      { id: 3, name: "온조", era: "백제", category: "삼국", icon: "🏛️", story: "백성들을 이끌고 한강 근처에 '백제'라는 아름다운 나라를 세운 임금님이에요. 백성들이 안심하고 살 수 있도록 농사짓기 좋은 땅을 찾아 터전을 만들었어요. 항상 백성들의 목소리에 귀를 기울인 따뜻한 리더였답니다.", question: "우리 동네에서 내가 가장 좋아하는 장소는 어디인가요?" },
+      { id: 4, name: "박혁거세", era: "신라", category: "삼국", icon: "🥚", story: "알에서 태어났다는 신비로운 이야기를 가진 신라의 첫 번째 임금님이에요. 흩어져 살던 사람들을 하나로 모아 평화롭고 넓은 나라를 만들었어요. 사람들에게 이로운 법을 만들어 서로 화목하게 지내도록 도와주었답니다.", question: "우리 반 친구들과 사이좋게 지내려면 어떻게 해야 할까요?" },
+      { id: 5, name: "광개토대왕", era: "고구려", category: "삼국", icon: "⚔️", story: "고구려의 땅을 아주 넓게 넓힌 씩씩하고 용맹한 임금님이에요. 백성들이 수많은 침략 걱정 없이 안심하고 살 수 있도록 나라를 튼튼하게 지켰어요. 언제나 당당한 모습으로 고구려의 이름을 널리 알렸답니다.", question: "내가 지키고 싶은 나만의 소중한 약속은 무엇인가요?" },
+      { id: 6, name: "이사부", era: "신라", category: "삼국", icon: "🦁", story: "나무로 만든 사자 인형을 써서 지혜롭게 울릉도와 독도를 신라 땅으로 만든 장군이에요. 힘만 쓰지 않고 지혜를 발휘해 싸우지 않고도 승리했답니다. 덕분에 오늘날 독도가 우리나라의 아름다운 섬으로 남을 수 있었어요.", question: "어려운 문제가 생겼을 때 지혜롭게 해결한 경험이 있나요?" },
+      { id: 7, name: "백결선생", era: "신라", category: "삼국", icon: "🪕", story: "가난하지만 거문고라는 악기를 아주 잘 연주했던 음악가예요. 떡을 찧을 곡식이 없을 때 거문고로 떡방아 소리를 내며 가족을 위로했어요. 어려운 상황에서도 음악을 통해 긍정적인 마음과 행복을 나누었답니다.", question: "속상할 때 내 기분을 기쁘게 해주는 음악이나 활동은 무엇인가요?" },
+      { id: 8, name: "의자왕", era: "백제", category: "삼국", icon: "❤️", story: "백제의 마지막 임금님으로, 어릴 적 부모님께 효도를 잘하여 이름을 알렸어요. 나라가 위험에 처했을 때 마지막 순간까지 백제와 백성들을 지키기 위해 노력했어요. 부모님을 사랑하고 나라를 아끼는 마음이 매우 깊었던 임금님이에요.", question: "오늘 부모님을 기쁘게 해드릴 수 있는 효도는 무엇이 있을까요?" },
+      { id: 9, name: "계백", era: "백제", category: "삼국", icon: "🛡️", story: "나라를 지키기 위해 끝까지 용기 있게 싸운 백제의 충직한 장군이에요. 수많은 적을 맞이해서도 끝까지 물러서지 않고 용감하게 싸웠어요. 나라를 사랑하는 뜨거운 마음은 오늘날까지 깊은 감동을 준답니다.", question: "무섭거나 힘들어도 용기를 내어 도전해 본 적이 있나요?" },
+      { id: 10, name: "김유신", era: "신라", category: "삼국", icon: "🐴", story: "삼국을 하나로 모으는 데 큰 힘을 보탠 신라의 명장군이에요. 어릴 때부터 꾸준히 무술을 익히고 스스로를 엄격하게 단련했어요. 끝까지 포기하지 않는 강한 의지로 신라를 힘있는 나라로 만들었답니다.", question: "매일 꾸준히 노력해서 이루고 싶은 목표가 있나요?" },
+      { id: 11, name: "대조영", era: "발해", category: "삼국", icon: "🏔️", story: "고구려가 사라진 후, 그 백성들을 모아 '발해'라는 나라를 다시 세운 영웅이에요. 어려운 환경 속에서도 희망을 잃지 않고 백성들에게 새로운 고향을 만들어 주었어요. 발해를 고구려의 멋진 문화를 이어받은 강한 나라로 키워냈답니다.", question: "힘든 일이 생겼을 때 포기하지 않고 다시 시작해 본 경험이 있나요?" },
+      { id: 12, name: "원효대사", era: "신라", category: "삼국", icon: "🧘‍♂️", story: "\"모든 것은 마음먹기에 달려있다\"라는 소중한 가르침을 전해준 스님이에요. 해골에 담긴 물을 마시고 깨달음을 얻어 사람들에게 쉬운 노래로 마음의 평화를 전했어요. 어려운 글을 몰라도 누구나 착하게 살면 행복해질 수 있다고 가르쳐 주셨답니다.", question: "마음을 밝고 긍정적으로 먹으면 어떤 좋은 일이 생길까요?" },
+      { id: 13, name: "강감찬", era: "고려", category: "고려", icon: "🌊", story: "귀주대첩에서 큰 승리를 거두어 고려를 지켜낸 지혜로운 장군이에요. 강물의 흐름을 이용하는 등 자연과 지형을 잘 활용해 적들을 물리쳤어요. 언제나 나라의 안전을 위해 깊이 생각하고 행동했던 멋진 리더였답니다.", question: "자연을 관찰하여 문제를 지혜롭게 해결한 적이 있나요?" },
+      { id: 14, name: "서희", era: "고려", category: "고려", icon: "🗣️", story: "칼과 창으로 싸우지 않고, '말하기'로 적을 설득해 나라를 지킨 외교관이에요. 당당하고 솔직한 대화로 상대방의 마음을 움직여 넓은 땅까지 얻어냈어요. 대화와 소통이 얼마나 강력한 힘을 가졌는지 잘 보여준 위인이랍니다.", question: "친구와 다투었을 때 대화로 오해를 풀었던 적이 있나요?" },
+      { id: 15, name: "정몽주", era: "고려", category: "고려", icon: "📜", story: "고려에 대한 변치 않는 마음을 시로 표현한 곧은 선비예요. 어떤 유혹이나 위험 앞에서도 자신의 소신과 의리를 끝까지 지켜냈어요. 자신이 옳다고 믿는 가치를 위해 목숨까지 바친 곧은 성품을 가졌답니다.", question: "내가 꼭 지키고 싶은 내 마음속 바른 원칙은 무엇인가요?" },
+      { id: 16, name: "최무선", era: "고려", category: "고려", icon: "💥", story: "우리나라에서 처음으로 화약을 만들어 바다를 지킨 과학자예요. 외국의 기술을 열심히 연구하여 고려만의 화약 무기를 완성해 냈어요. 최무선이 만든 화포 덕분에 왜구의 침략으로부터 백성들을 안심시킬 수 있었답니다.", question: "새로운 기술이나 도구를 만들어 사람들을 돕는다면 무엇을 만들고 싶나요?" },
+      { id: 17, name: "문익점", era: "고려", category: "고려", icon: "🌱", story: "붓통 속에 목화씨를 숨겨 가지고 들어와 사람들에게 따뜻한 옷을 선물한 위인이에요. 추운 겨울에 얇은 옷만 입고 떨던 백성들을 불쌍히 여겨 위험을 무릅썼어요. 목화 덕분에 우리나라 사람들 누구나 따뜻한 솜옷과 이불을 덮을 수 있게 되었답니다.", question: "추운 겨울에 따뜻하게 지낼 수 있게 해주는 고마운 물건들은 무엇이 있나요?" },
+      { id: 18, name: "세종대왕", era: "조선", category: "조선", icon: "📖", story: "글을 몰라 힘들어하는 백성들을 위해 배우기 쉬운 '한글'을 만든 훌륭한 임금님이에요. 해시계, 물시계, 측우기 같은 과학 도구를 만들도록 지원하여 삶을 풍요롭게 했어요. 백성을 사랑하는 따뜻한 마음으로 우리나라 최고의 문화를 꽃피웠답니다.", question: "한글이 없었다면 지금 우리는 어떻게 글을 쓰고 읽고 있을까요?" },
+      { id: 19, name: "이순신", era: "조선", category: "조선", icon: "🐢", story: "세계 최초의 철갑선인 '거북선'을 만들고 바다를 지켜낸 위대한 장군이에요. 어려운 상황에서도 \"나에게는 아직 12척의 배가 있습니다\"라며 용기를 잃지 않았어요. 끝까지 나라와 백성을 위해 목숨을 바쳐 싸운 진정한 영웅이랍니다.", question: "두렵고 힘든 순간을 만났을 때 용기를 얻는 방법은 무엇인가요?" },
+      { id: 20, name: "장영실", era: "조선", category: "조선", icon: "☀️", story: "신분은 낮았지만 최고의 손재주와 지혜로 멋진 발명품을 만든 과학자예요. 해의 움직임으로 시간을 아는 '앙부일구'와 비의 양을 재는 '측우기'를 만들었어요. 새로운 것을 궁금해하고 끝없이 연구하는 열정을 가졌답니다.", question: "평소에 주변 물건을 보며 궁금했던 점은 무엇인가요?" },
+      { id: 21, name: "신사임당", era: "조선", category: "조선", icon: "🎨", story: "풀, 벌레, 과일 등을 진짜처럼 아주 섬세하게 그린 훌륭한 화가이자 시인이에요. 자녀들을 따뜻하고 올바르게 키워낸 지혜로운 어머니이기도 했어요. 주변 자연의 작은 생명 하나도 놓치지 않고 사랑하는 마음을 그림에 담았답니다.", question: "자연 속에서 가장 예쁘고 자세히 그려보고 싶은 식물이나 곤충은 무엇인가요?" },
+      { id: 22, name: "허준", era: "조선", category: "조선", icon: "🌿", story: "병으로 아파하는 가난한 백성들을 위해 평생을 바쳐 치료해 준 의사예요. 우리나라에서 나는 약초와 치료법을 모아 '동의보감'이라는 위대한 의학책을 썼어요. 생명을 아끼고 사랑하는 마음으로 모든 사람을 따뜻하게 대해 주었답니다.", question: "주위에 아프거나 힘든 친구가 있다면 어떻게 도와줄 수 있을까요?" },
+      { id: 23, name: "김정호", era: "조선", category: "조선", icon: "🗺️", story: "우리나라 방방곡곡을 직접 걸어 다니며 정밀한 지도인 '대동여지도'를 만든 학자예요. 사람들이 길을 잃지 않고 전국을 쉽게 오갈 수 있도록 일생을 지도 제작에 바쳤어요. 포기하지 않는 끈기와 열정으로 오늘날의 위대한 지도를 완성했답니다.", question: "내가 살고 있는 우리 동네의 보물지도나 약도를 그려본다면 어떨까요?" },
+      { id: 24, name: "정약용", era: "조선", category: "조선", icon: "🏗️", story: "백성들의 삶을 더 편하게 만들기 위해 수많은 책을 쓰고 연구한 실학자예요. 무거운 돌을 쉽게 끌어올릴 수 있는 '거중기'를 만들어 수원화성을 쌓는 데 도움을 주었어요. 항상 백성들의 입장에서 생각하며 지식을 현실에 유용하게 사용했답니다.", question: "무거운 짐을 들거나 힘들 때 도구를 써서 편해진 경험이 있나요?" },
+      { id: 25, name: "율곡 이이", era: "조선", category: "조선", icon: "✍️", story: "어릴 때부터 학문이 뛰어났으며 나라에 어려움이 오기 전에 미리 준비하자고 주장한 학자예요. 어머니 신사임당을 깊이 존경하며 효도를 다하고 열심히 공부했어요. 미래를 예측하고 대비하는 지혜의 중요성을 우리에게 보여주었답니다.", question: "내일 할 일이나 다가올 시험을 미리 준비하면 어떤 점이 좋을까요?" },
+      { id: 26, name: "퇴계 이황", era: "조선", category: "조선", icon: "🤝", story: "마음을 바르게 가다듬고 타인을 배려하는 예절을 중요하게 여긴 위대한 스승이에요. 자신보다 나이가 어린 학생이나 신분이 낮은 사람에게도 항상 존댓말을 쓰며 존중했어요. 평생 겸손한 태도로 학문을 탐구하며 많은 제자들을 가르쳤답니다.", question: "내가 다른 사람을 존중하고 예의 바르게 행동한 경험은 언제인가요?" },
+      { id: 27, name: "한석봉", era: "조선", category: "조선", icon: "🖌️", story: "어두운 방 안에서도 글씨를 바르게 쓸 수 있을 정도로 연습을 많이 한 최고의 서예가예요. \"어머니는 떡을 쓸 테니 너는 글을 쓰거라\"라는 유명한 이야기처럼 피땀 어린 노력을 했어요. 타고난 재능보다 꾸준한 연습과 노력이 더욱 값지다는 것을 증명해 보여주었답니다.", question: "글씨나 그림, 운동을 잘하기 위해 매일 연습해 본 적이 있나요?" },
+      { id: 28, name: "안중근", era: "근현대", category: "근현대", icon: "🇰🇷", story: "우리나라의 독립과 아시아의 평화를 위해 목숨을 바친 용감한 독립운동가예요. 나라를 빼앗긴 슬픔 속에서도 용기를 잃지 않고 뜻을 함께하는 사람들을 모았어요. 네 번째 손가락을 자르며 나라 사랑을 맹세했던 뜨거운 마음을 가진 영웅이랍니다.", question: "우리나라 태극기를 볼 때 어떤 마음이 드나요?" },
+      { id: 29, name: "유관순", era: "근현대", category: "근현대", icon: "📢", story: "어린 나이에도 무서워하지 않고 손에 태극기를 들고 \"대한독립 만세!\"를 외친 열사예요. 감옥에 갇혀서도 끝까지 굽히지 않고 우리나라의 자유와 독립을 주창했어요. 당당하고 용기 있는 행동으로 수많은 사람들의 가슴에 독립의 불꽃을 피웠답니다.", question: "내가 유관순 누나/언니처럼 용기를 내어 만세를 외친다면 어떤 마음일까요?" },
+      { id: 30, name: "윤동주", era: "근현대", category: "근현대", icon: "⭐", story: "어두운 시절에도 순수한 마음과 나라 사랑의 염원을 아름다운 시로 담아낸 시인이에요. \"하늘을 두려워하고 한 점 부끄럼이 없기를\" 바라는 맑고 정직한 시들을 남겼어요. 총과 칼 대신 연필을 들고 아름다운 우리글로 희망과 용기를 시에 새겨 넣었답니다.", question: "내가 시인이 되어 예쁜 시를 쓴다면 어떤 내용을 써보고 싶나요?" }
+    ];
+
+    let currentEraFilter = 'all';
+    let isAllFlipped = false;
+    let qrcodeInstance = null;
+
+    // Render Cards in Grid
+    function renderCards(list) {
+      const grid = document.getElementById('cardGrid');
+      const noResults = document.getElementById('noResults');
+      grid.innerHTML = '';
+
+      if (list.length === 0) {
+        noResults.classList.remove('hidden');
+        return;
+      } else {
+        noResults.classList.add('hidden');
+      }
+
+      list.forEach((hero) => {
+        const cardElem = document.createElement('div');
+        cardElem.className = 'card-perspective card-container w-full aspect-[2/2.95] cursor-pointer group';
+        cardElem.setAttribute('data-id', hero.id);
+        cardElem.setAttribute('onclick', 'toggleCard(this)');
+
+        cardElem.innerHTML = `
+          <div class="card-inner">
+            <!-- FRONT SIDE -->
+            <div class="card-front bg-ghibli-cardFront flex flex-col justify-between p-3.5 shadow-sm group-hover:shadow-md transition">
+              <!-- Top Era Tag & Number -->
+              <div class="flex items-center justify-between w-full">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-ghibli-accent text-white shadow-xs">
+                  ${hero.era}
+                </span>
+                <span class="text-[11px] font-bold text-ghibli-secondary font-mono">
+                  #${String(hero.id).padStart(2, '0')}
+                </span>
+              </div>
+
+              <!-- Center Illustration/Icon Avatar -->
+              <div class="my-auto flex flex-col items-center justify-center">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-ghibli-softYellow rounded-full border-2 border-dashed border-ghibli-gold flex items-center justify-center text-3xl sm:text-4xl shadow-inner mb-2 group-hover:scale-105 transition transform">
+                  ${hero.icon}
+                </div>
+                <h3 class="text-base sm:text-lg font-bold font-gaegu text-ghibli-primary leading-tight">
+                  ${hero.name}
+                </h3>
+              </div>
+
+              <!-- Bottom Prompt -->
+              <div class="pt-2 border-t border-ghibli-border/60 w-full flex items-center justify-center gap-1 text-[10px] text-ghibli-secondary font-medium">
+                <i class="fa-solid fa-hand-pointer animate-bounce text-ghibli-accent"></i>
+                <span>터치하여 뒤집기</span>
+              </div>
+            </div>
+
+            <!-- BACK SIDE -->
+            <div class="card-back bg-ghibli-cardBack flex flex-col justify-between p-3 text-left shadow-sm">
+              <!-- Top Header -->
+              <div>
+                <div class="flex items-center justify-between border-b-2 border-ghibli-accent pb-1 mb-2">
+                  <span class="font-bold font-gaegu text-base text-ghibli-primary">${hero.name}</span>
+                  <span class="text-[10px] text-ghibli-secondary font-bold">${hero.era}</span>
+                </div>
+
+                <!-- Story Section -->
+                <div class="mb-2">
+                  <div class="text-[10px] font-bold text-ghibli-accent flex items-center gap-1 mb-1">
+                    <i class="fa-solid fa-book-open"></i> 위인 이야기
+                  </div>
+                  <p class="text-[11px] text-ghibli-primary leading-relaxed font-normal custom-scroll max-h-[110px] sm:max-h-[125px] overflow-y-auto pr-1">
+                    ${hero.story}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Reflection Question Box -->
+              <div class="bg-ghibli-softYellow p-2 rounded-lg border-l-3 border-ghibli-accent text-[10.5px] text-ghibli-primary">
+                <div class="font-bold text-[10px] text-ghibli-secondary mb-0.5 flex items-center gap-1">
+                  <i class="fa-solid fa-comment-dots text-ghibli-accent"></i> 생각해 볼 질문
+                </div>
+                <p class="leading-tight">${hero.question}</p>
+              </div>
+            </div>
+          </div>
+        `;
+        grid.appendChild(cardElem);
+      });
+    }
+
+    // Toggle Single Card
+    function toggleCard(cardElem) {
+      cardElem.classList.toggle('flipped');
+    }
+
+    // Toggle All Cards
+    function toggleFlipAll() {
+      const cards = document.querySelectorAll('.card-container');
+      isAllFlipped = !isAllFlipped;
+      cards.forEach(card => {
+        if (isAllFlipped) {
+          card.classList.add('flipped');
+        } else {
+          card.classList.remove('flipped');
+        }
+      });
+
+      const btnText = document.getElementById('flipToggleText');
+      btnText.textContent = isAllFlipped ? '앞면으로 돌리기' : '전체 뒤집기';
+    }
+
+    // Filter by Era
+    function setEraFilter(era) {
+      currentEraFilter = era;
+      
+      // Button states
+      const buttons = document.querySelectorAll('.era-btn');
+      buttons.forEach(btn => {
+        btn.classList.remove('bg-ghibli-primary', 'text-white', 'active');
+        btn.classList.add('bg-white', 'text-ghibli-primary');
+      });
+
+      event.target.classList.remove('bg-white', 'text-ghibli-primary');
+      event.target.classList.add('bg-ghibli-primary', 'text-white', 'active');
+
+      filterCards();
+    }
+
+    // Filter Logic combining Search + Era
+    function filterCards() {
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+      
+      const filtered = heroesData.filter(hero => {
+        const matchesEra = (currentEraFilter === 'all') || (hero.category === currentEraFilter);
+        const matchesQuery = hero.name.toLowerCase().includes(query) || 
+                             hero.story.toLowerCase().includes(query) || 
+                             hero.era.toLowerCase().includes(query);
+        return matchesEra && matchesQuery;
+      });
+
+      renderCards(filtered);
+    }
+
+    // Modal & QR Code Management
+    const qrModal = document.getElementById('qrModal');
+    const btnQrModal = document.getElementById('btnQrModal');
+    const btnCloseQr = document.getElementById('btnCloseQr');
+    const qrUrlInput = document.getElementById('qrUrlInput');
+
+    function getShareUrl() {
+      // Use current deployment URL or window.location
+      return window.location.href.split('#')[0];
+    }
+
+    function generateQrCode(url) {
+      const qrContainer = document.getElementById('qrcodeCanvas');
+      qrContainer.innerHTML = ''; // Clear previous
+
+      qrcodeInstance = new QRCode(qrContainer, {
+        text: url,
+        width: 180,
+        height: 180,
+        colorDark: "#4a3b32",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+
+    btnQrModal.addEventListener('click', () => {
+      const currentUrl = getShareUrl();
+      qrUrlInput.value = currentUrl;
+      qrModal.classList.remove('hidden');
+      generateQrCode(currentUrl);
+    });
+
+    btnCloseQr.addEventListener('click', () => {
+      qrModal.classList.add('hidden');
+    });
+
+    qrModal.addEventListener('click', (e) => {
+      if (e.target === qrModal) {
+        qrModal.classList.add('hidden');
+      }
+    });
+
+    // Copy QR URL to clipboard
+    function copyQrUrl() {
+      qrUrlInput.select();
+      try {
+        document.execCommand('copy');
+        showToast('URL 주소가 복사되었습니다!');
+      } catch (err) {
+        console.error('Copy failed:', err);
+      }
+    }
+
+    // Download QR Code as Image
+    function downloadQrCode() {
+      const img = document.querySelector('#qrcodeCanvas img');
+      const canvas = document.querySelector('#qrcodeCanvas canvas');
+      let imageSrc = '';
+
+      if (img && img.src) {
+        imageSrc = img.src;
+      } else if (canvas) {
+        imageSrc = canvas.toDataURL("image/png");
+      }
+
+      if (imageSrc) {
+        const a = document.createElement('a');
+        a.href = imageSrc;
+        a.download = '위인카드_접속_QR.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    }
+
+    // Custom Toast Notice
+    function showToast(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-ghibli-primary text-white text-xs px-4 py-2.5 rounded-xl shadow-lg z-50 animate-bounce';
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2500);
+    }
+
+    // Initialize App
+    window.onload = function() {
+      renderCards(heroesData);
+    };
+  </script>
+</body>
+</html>
